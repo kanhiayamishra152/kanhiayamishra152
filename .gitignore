@@ -1,39 +1,5 @@
 ```
-# Flutter/Dart
-.dart_tool/
-.packages
-.pub-cache/
+# Gradle
+.gradle/
 build/
-*.g.dart
-*.freezed.dart
-
-# Android
-android/.gradle/
-android/build/
-android/app/build/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temp files
-*.tmp
-*.temp
-
-# Dependencies
-node_modules/
 ```
