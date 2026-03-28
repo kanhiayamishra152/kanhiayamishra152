@@ -1,142 +1,315 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../models/unit_model.dart';
 import '../providers/converter_provider.dart';
-import '../widgets/category_selector.dart';
-import '../widgets/conversion_card.dart';
-import '../widgets/theme_toggle.dart';
+import '../providers/theme_provider.dart';
 
-/// Home Screen - Main converter interface
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _inputController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with weight category
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConverterProvider>().setCategory(UnitCategory.weight);
+    });
+  }
+
+  @override
+  void dispose() {
+    _inputController.dispose();
+    super.dispose();
+  }
+
+  void _onCategorySelected(UnitCategory category) {
+    context.read<ConverterProvider>().setCategory(category);
+    _inputController.clear();
+    context.read<ConverterProvider>().setInputValue('');
+  }
+
+  void _copyToClipboard() {
+    final provider = context.read<ConverterProvider>();
+    final resultWithSymbol = provider.getResultWithSymbol();
+    
+    Clipboard.setData(ClipboardData(text: resultWithSymbol));
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied: $resultWithSymbol'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ConverterProvider>(context);
-    final isDarkMode = provider.isDarkMode;
-    final categoryName = provider.selectedCategory.toString().split('.').last;
+    final themeProvider = context.watch<ThemeProvider>();
+    final converterProvider = context.watch<ConverterProvider>();
+    final isDarkMode = themeProvider.isDarkMode;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF8F9FA),
-      body: SafeArea(
+      appBar: AppBar(
+        title: const Text('Unit Converter'),
+        actions: [
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () => themeProvider.toggleTheme(),
+            tooltip: 'Toggle Theme',
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
-            _buildHeader(context, isDarkMode),
+            // Category Selection
+            _buildCategorySelector(converterProvider),
             
             const SizedBox(height: 24),
-            
-            // Category Selector
-            const CategorySelector(),
-            
-            const SizedBox(height: 24),
-            
-            // Category Title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Icon(
-                    provider.selectedCategory == UnitCategory.weight
-                        ? Icons.scale
-                        : provider.selectedCategory == UnitCategory.length
-                            ? Icons.straighten
-                            : provider.selectedCategory == UnitCategory.volume
-                                ? Icons.water_drop
-                                : provider.selectedCategory == UnitCategory.temperature
-                                    ? Icons.thermostat
-                                    : provider.selectedCategory == UnitCategory.area
-                                        ? Icons.square_foot
-                                        : Icons.speed,
-                    color: provider.getCurrentColor(),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    _getCategoryDisplayName(provider.selectedCategory),
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 20),
             
             // Conversion Card
-            Expanded(
-              child: const ConversionCard(),
-            ),
+            _buildConversionCard(converterProvider, isDarkMode),
             
-            // Footer info
-            _buildFooter(isDarkMode),
+            const SizedBox(height: 24),
+            
+            // Result Display
+            _buildResultDisplay(converterProvider, isDarkMode),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isDarkMode) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Unit Converter',
-                style: GoogleFonts.poppins(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-              Text(
-                'Convert anything, anytime',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: isDarkMode ? Colors.grey[500] : Colors.grey[600],
-                ),
-              ),
-            ],
+  Widget _buildCategorySelector(ConverterProvider provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Select Category',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-          const ThemeToggle(),
-        ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: UnitCategory.values.map((category) {
+            final isSelected = provider.selectedCategory == category;
+            return ChoiceChip(
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(category.icon, style: const TextStyle(fontSize: 16)),
+                  const SizedBox(width: 6),
+                  Text(category.displayName),
+                ],
+              ),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) _onCategorySelected(category);
+              },
+              selectedColor: Colors.blue,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : null,
+                fontWeight: isSelected ? FontWeight.bold : null,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConversionCard(ConverterProvider provider, bool isDarkMode) {
+    return Card(
+      elevation: 8,
+      shadowColor: isDarkMode ? Colors.black45 : Colors.grey,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            // From Unit Section
+            _buildUnitSelector(
+              label: 'From',
+              selectedUnit: provider.fromUnit,
+              units: provider.availableUnits,
+              onChanged: (unit) => provider.setFromUnit(unit),
+              isDarkMode: isDarkMode,
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Input Field
+            TextField(
+              controller: _inputController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
+              ],
+              decoration: InputDecoration(
+                labelText: 'Value',
+                hintText: 'Enter value',
+                prefixIcon: const Icon(Icons.edit),
+              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              onChanged: (value) => provider.setInputValue(value),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Swap Button
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () => provider.swapUnits(),
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text('Swap Units'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // To Unit Section
+            _buildUnitSelector(
+              label: 'To',
+              selectedUnit: provider.toUnit,
+              units: provider.availableUnits,
+              onChanged: (unit) => provider.setToUnit(unit),
+              isDarkMode: isDarkMode,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  String _getCategoryDisplayName(UnitCategory category) {
-    switch (category) {
-      case UnitCategory.weight:
-        return 'Weight & Mass';
-      case UnitCategory.length:
-        return 'Length & Distance';
-      case UnitCategory.volume:
-        return 'Volume & Capacity';
-      case UnitCategory.temperature:
-        return 'Temperature';
-      case UnitCategory.area:
-        return 'Area';
-      case UnitCategory.speed:
-        return 'Speed';
-    }
+  Widget _buildUnitSelector({
+    required String label,
+    required UnitModel? selectedUnit,
+    required List<UnitModel> units,
+    required ValueChanged<UnitModel?> onChanged,
+    required bool isDarkMode,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<UnitModel>(
+          value: selectedUnit,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: isDarkMode ? const Color(0xFF4A5568) : Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          items: units.map((unit) {
+            return DropdownMenuItem<UnitModel>(
+              value: unit,
+              child: Text('${unit.name} (${unit.symbol})'),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ],
+    );
   }
 
-  Widget _buildFooter(bool isDarkMode) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Text(
-        'High precision conversion up to 10 decimal places',
-        style: GoogleFonts.poppins(
-          fontSize: 12,
-          color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-          fontStyle: FontStyle.italic,
+  Widget _buildResultDisplay(ConverterProvider provider, bool isDarkMode) {
+    final resultText = provider.formattedResult;
+    final symbol = provider.toUnit?.symbol ?? '';
+    
+    return Card(
+      elevation: 8,
+      shadowColor: isDarkMode ? Colors.black45 : Colors.grey,
+      color: isDarkMode ? const Color(0xFF2D3748) : const Color(0xFFF5F7FA),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            const Text(
+              'Result',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Expanded(
+                  child: Text(
+                    resultText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.blue[300] : Colors.blue,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (symbol.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    symbol,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _copyToClipboard,
+              icon: const Icon(Icons.copy),
+              label: const Text('Copy to Clipboard'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
