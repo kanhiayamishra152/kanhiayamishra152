@@ -1,115 +1,77 @@
+// lib/providers/theme_provider.dart
 import 'package:flutter/material.dart';
-import '../models/unit_model.dart';
 
-class ThemeProvider with ChangeNotifier {
+class ThemeProvider extends ChangeNotifier {
   bool _isDarkMode = false;
 
   bool get isDarkMode => _isDarkMode;
-
-  ThemeData get currentTheme => _isDarkMode ? darkTheme : lightTheme;
 
   void toggleTheme() {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
   }
 
-  static final ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    primarySwatch: Colors.blue,
-    scaffoldBackgroundColor: const Color(0xFFE8ECF1),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFFE8ECF1),
-      elevation: 0,
-      iconTheme: IconThemeData(color: Color(0xFF2D3748)),
-      titleTextStyle: TextStyle(
-        color: Color(0xFF2D3748),
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-    cardTheme: CardTheme(
-      color: const Color(0xFFF5F7FA),
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: const Color(0xFFFFFFFF),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF4A90D9), width: 2),
-      ),
-    ),
-    dropdownMenuTheme: DropdownMenuThemeData(
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: const Color(0xFFFFFFFF),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+  ThemeData get themeData {
+    if (_isDarkMode) {
+      return ThemeData.dark().copyWith(
+        primaryColor: Colors.grey[800],
+        scaffoldBackgroundColor: Colors.grey[900],
+        cardTheme: CardTheme(
+          color: Colors.grey[850],
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
-      ),
-    ),
-  );
-
-  static final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    primarySwatch: Colors.blue,
-    scaffoldBackgroundColor: const Color(0xFF1A202C),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF1A202C),
-      elevation: 0,
-      iconTheme: IconThemeData(color: Color(0xFFE2E8F0)),
-      titleTextStyle: TextStyle(
-        color: Color(0xFFE2E8F0),
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-    cardTheme: CardTheme(
-      color: const Color(0xFF2D3748),
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: const Color(0xFF4A5568),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF63B3ED), width: 2),
-      ),
-    ),
-    dropdownMenuTheme: DropdownMenuThemeData(
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: const Color(0xFF4A5568),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        textTheme: TextTheme(
+          headlineMedium: TextStyle(color: Colors.white, fontSize: 24),
+          titleLarge: TextStyle(color: Colors.white70, fontSize: 18),
+          bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
         ),
-      ),
-    ),
-  );
+        iconTheme: IconThemeData(color: Colors.white),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[800],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
+          ),
+        ),
+      );
+    } else {
+      return ThemeData.light().copyWith(
+        primaryColor: Colors.grey[100],
+        scaffoldBackgroundColor: Colors.grey[50],
+        cardTheme: CardTheme(
+          color: Colors.white,
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        textTheme: TextTheme(
+          headlineMedium: TextStyle(color: Colors.grey[800], fontSize: 24),
+          titleLarge: TextStyle(color: Colors.grey[600], fontSize: 18),
+          bodyLarge: TextStyle(color: Colors.grey[800], fontSize: 16),
+        ),
+        iconTheme: IconThemeData(color: Colors.grey[700]),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
+          ),
+        ),
+      );
+    }
+  }
 }
