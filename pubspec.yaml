@@ -1,5 +1,5 @@
 name: unit_converter
-description: A premium modern unit converter application with neumorphic design.
+description: A complete unit converter application built with Flutter.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,20 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  # State Management
-  provider: ^6.1.1
-  
-  # UI/UX
-  google_fonts: ^6.1.0
-  
-  # Utilities
-  intl: ^0.18.1
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.1
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true

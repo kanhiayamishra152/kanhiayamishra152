@@ -1,4 +1,6 @@
-/// Unit Category Enum with built-in methods
+// lib/models/unit_model.dart
+import 'package:flutter/material.dart';
+
 enum UnitCategory {
   weight,
   length,
@@ -9,9 +11,9 @@ enum UnitCategory {
   String get displayName {
     switch (this) {
       case UnitCategory.weight:
-        return 'Weight / Mass';
+        return 'Weight';
       case UnitCategory.length:
-        return 'Length / Distance';
+        return 'Length';
       case UnitCategory.volume:
         return 'Volume';
       case UnitCategory.temperature:
@@ -21,100 +23,80 @@ enum UnitCategory {
     }
   }
 
-  String get icon {
+  IconData get icon {
     switch (this) {
       case UnitCategory.weight:
-        return '⚖️';
+        return Icons.scale;
       case UnitCategory.length:
-        return '📏';
+        return Icons.straighten;
       case UnitCategory.volume:
-        return '💧';
+        return Icons.local_drink;
       case UnitCategory.temperature:
-        return '🌡️';
+        return Icons.thermostat;
       case UnitCategory.area:
-        return '📐';
+        return Icons.square_foot;
     }
   }
 
   List<UnitModel> get units {
     switch (this) {
       case UnitCategory.weight:
-        return UnitModel.weightUnits;
+        return [
+          UnitModel(name: 'Kilograms', symbol: 'kg', factor: 1),
+          UnitModel(name: 'Grams', symbol: 'g', factor: 1000),
+          UnitModel(name: 'Milligrams', symbol: 'mg', factor: 1000000),
+          UnitModel(name: 'Metric Tons', symbol: 't', factor: 0.001),
+          UnitModel(name: 'Pounds', symbol: 'lb', factor: 2.2046226218),
+          UnitModel(name: 'Ounces', symbol: 'oz', factor: 35.27396195),
+        ];
       case UnitCategory.length:
-        return UnitModel.lengthUnits;
+        return [
+          UnitModel(name: 'Meters', symbol: 'm', factor: 1),
+          UnitModel(name: 'Kilometers', symbol: 'km', factor: 0.001),
+          UnitModel(name: 'Centimeters', symbol: 'cm', factor: 100),
+          UnitModel(name: 'Millimeters', symbol: 'mm', factor: 1000),
+          UnitModel(name: 'Miles', symbol: 'mi', factor: 0.0006213712),
+          UnitModel(name: 'Yards', symbol: 'yd', factor: 1.0936132983),
+          UnitModel(name: 'Feet', symbol: 'ft', factor: 3.280839895),
+          UnitModel(name: 'Inches', symbol: 'in', factor: 39.37007874),
+        ];
       case UnitCategory.volume:
-        return UnitModel.volumeUnits;
+        return [
+          UnitModel(name: 'Liters', symbol: 'L', factor: 1),
+          UnitModel(name: 'Milliliters', symbol: 'mL', factor: 1000),
+          UnitModel(name: 'Cubic Meters', symbol: 'm³', factor: 0.001),
+          UnitModel(name: 'Gallons (US)', symbol: 'gal', factor: 0.2641720524),
+          UnitModel(name: 'Quarts', symbol: 'qt', factor: 1.0566882094),
+          UnitModel(name: 'Pints', symbol: 'pt', factor: 2.1133764189),
+          UnitModel(name: 'Cups', symbol: 'cup', factor: 4.1666666667),
+        ];
       case UnitCategory.temperature:
-        return UnitModel.temperatureUnits;
+        return [
+          UnitModel(name: 'Celsius', symbol: '°C', factor: 1),
+          UnitModel(name: 'Fahrenheit', symbol: '°F', factor: 1),
+          UnitModel(name: 'Kelvin', symbol: 'K', factor: 1),
+        ];
       case UnitCategory.area:
-        return UnitModel.areaUnits;
+        return [
+          UnitModel(name: 'Square Meters', symbol: 'm²', factor: 1),
+          UnitModel(name: 'Square Kilometers', symbol: 'km²', factor: 0.000001),
+          UnitModel(name: 'Acres', symbol: 'ac', factor: 0.0002471054),
+          UnitModel(name: 'Hectares', symbol: 'ha', factor: 0.0001),
+        ];
     }
   }
 }
 
-/// Unit Model Class
 class UnitModel {
   final String name;
   final String symbol;
-  final double conversionFactor; // Factor to convert to base unit
-  final UnitCategory category;
-  final bool isBaseUnit;
+  final double factor;
 
   const UnitModel({
     required this.name,
     required this.symbol,
-    required this.conversionFactor,
-    required this.category,
-    this.isBaseUnit = false,
+    required this.factor,
   });
-
-  // Weight Units (Base: Gram)
-  static const List<UnitModel> weightUnits = [
-    UnitModel(name: 'Kilogram', symbol: 'kg', conversionFactor: 1000.0, category: UnitCategory.weight),
-    UnitModel(name: 'Gram', symbol: 'g', conversionFactor: 1.0, category: UnitCategory.weight, isBaseUnit: true),
-    UnitModel(name: 'Milligram', symbol: 'mg', conversionFactor: 0.001, category: UnitCategory.weight),
-    UnitModel(name: 'Metric Ton', symbol: 't', conversionFactor: 1000000.0, category: UnitCategory.weight),
-    UnitModel(name: 'Pound', symbol: 'lb', conversionFactor: 453.59237, category: UnitCategory.weight),
-    UnitModel(name: 'Ounce', symbol: 'oz', conversionFactor: 28.349523125, category: UnitCategory.weight),
-  ];
-
-  // Length Units (Base: Meter)
-  static const List<UnitModel> lengthUnits = [
-    UnitModel(name: 'Meter', symbol: 'm', conversionFactor: 1.0, category: UnitCategory.length, isBaseUnit: true),
-    UnitModel(name: 'Kilometer', symbol: 'km', conversionFactor: 1000.0, category: UnitCategory.length),
-    UnitModel(name: 'Centimeter', symbol: 'cm', conversionFactor: 0.01, category: UnitCategory.length),
-    UnitModel(name: 'Millimeter', symbol: 'mm', conversionFactor: 0.001, category: UnitCategory.length),
-    UnitModel(name: 'Mile', symbol: 'mi', conversionFactor: 1609.344, category: UnitCategory.length),
-    UnitModel(name: 'Yard', symbol: 'yd', conversionFactor: 0.9144, category: UnitCategory.length),
-    UnitModel(name: 'Foot', symbol: 'ft', conversionFactor: 0.3048, category: UnitCategory.length),
-    UnitModel(name: 'Inch', symbol: 'in', conversionFactor: 0.0254, category: UnitCategory.length),
-  ];
-
-  // Volume Units (Base: Liter)
-  static const List<UnitModel> volumeUnits = [
-    UnitModel(name: 'Liter', symbol: 'L', conversionFactor: 1.0, category: UnitCategory.volume, isBaseUnit: true),
-    UnitModel(name: 'Milliliter', symbol: 'mL', conversionFactor: 0.001, category: UnitCategory.volume),
-    UnitModel(name: 'Cubic Meter', symbol: 'm³', conversionFactor: 1000.0, category: UnitCategory.volume),
-    UnitModel(name: 'Gallon (US)', symbol: 'gal', conversionFactor: 3.785411784, category: UnitCategory.volume),
-    UnitModel(name: 'Quart', symbol: 'qt', conversionFactor: 0.946352946, category: UnitCategory.volume),
-    UnitModel(name: 'Pint', symbol: 'pt', conversionFactor: 0.473176473, category: UnitCategory.volume),
-    UnitModel(name: 'Cup', symbol: 'cup', conversionFactor: 0.2365882365, category: UnitCategory.volume),
-  ];
-
-  // Temperature Units (Special handling required)
-  static const List<UnitModel> temperatureUnits = [
-    UnitModel(name: 'Celsius', symbol: '°C', conversionFactor: 1.0, category: UnitCategory.temperature, isBaseUnit: true),
-    UnitModel(name: 'Fahrenheit', symbol: '°F', conversionFactor: 1.0, category: UnitCategory.temperature),
-    UnitModel(name: 'Kelvin', symbol: 'K', conversionFactor: 1.0, category: UnitCategory.temperature),
-  ];
-
-  // Area Units (Base: Square Meter)
-  static const List<UnitModel> areaUnits = [
-    UnitModel(name: 'Square Meter', symbol: 'm²', conversionFactor: 1.0, category: UnitCategory.area, isBaseUnit: true),
-    UnitModel(name: 'Square Kilometer', symbol: 'km²', conversionFactor: 1000000.0, category: UnitCategory.area),
-    UnitModel(name: 'Acre', symbol: 'ac', conversionFactor: 4046.8564224, category: UnitCategory.area),
-    UnitModel(name: 'Hectare', symbol: 'ha', conversionFactor: 10000.0, category: UnitCategory.area),
-  ];
 
   @override
   String toString() => '$name ($symbol)';
