@@ -1,36 +1,32 @@
 ```
-# Dependencies
-.dart_tool/
-.build/
-packages/
-
-# Build outputs
+# Gradle
+.gradle/
 build/
+target/
+
+# Android
 *.apk
-*.aab
-*.ipa
+*.aar
+*.dex
 
-# IDE
-.idea/
-.vscode/
-*.iml
-*.ipr
-*.iws
-
-# Environment
+# Environment specific
 .env
 .env.local
 *.env.*
 
 # Logs
 *.log
-**/logs
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Temporary files
-*.tmp
-*.temp
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.egg-info/
 ```
