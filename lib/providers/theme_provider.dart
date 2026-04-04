@@ -1,77 +1,60 @@
-// lib/providers/theme_provider.dart
 import 'package:flutter/material.dart';
 
-class ThemeProvider extends ChangeNotifier {
+class ThemeProvider with ChangeNotifier {
   bool _isDarkMode = false;
 
   bool get isDarkMode => _isDarkMode;
+
+  ThemeData get currentTheme => _isDarkMode ? darkTheme : lightTheme;
 
   void toggleTheme() {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
   }
 
-  ThemeData get themeData {
-    if (_isDarkMode) {
-      return ThemeData.dark().copyWith(
-        primaryColor: Colors.grey[800],
-        scaffoldBackgroundColor: Colors.grey[900],
-        cardTheme: CardTheme(
-          color: Colors.grey[850],
-          elevation: 8,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        textTheme: TextTheme(
-          headlineMedium: TextStyle(color: Colors.white, fontSize: 24),
-          titleLarge: TextStyle(color: Colors.white70, fontSize: 18),
-          bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
-        ),
-        iconTheme: IconThemeData(color: Colors.white),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey[800],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue, width: 2),
-          ),
-        ),
-      );
-    } else {
-      return ThemeData.light().copyWith(
-        primaryColor: Colors.grey[100],
-        scaffoldBackgroundColor: Colors.grey[50],
-        cardTheme: CardTheme(
-          color: Colors.white,
-          elevation: 8,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        textTheme: TextTheme(
-          headlineMedium: TextStyle(color: Colors.grey[800], fontSize: 24),
-          titleLarge: TextStyle(color: Colors.grey[600], fontSize: 18),
-          bodyLarge: TextStyle(color: Colors.grey[800], fontSize: 16),
-        ),
-        iconTheme: IconThemeData(color: Colors.grey[700]),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey[100],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue, width: 2),
-          ),
-        ),
-      );
-    }
-  }
+  static final ThemeData lightTheme = ThemeData(
+    brightness: Brightness.light,
+    primarySwatch: Colors.blue,
+    scaffoldBackgroundColor: const Color(0xFFE8ECF1),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFFE8ECF1),
+      elevation: 0,
+      iconTheme: IconThemeData(color: Color(0xFF2D3748)),
+      titleTextStyle: TextStyle(
+        color: Color(0xFF2D3748),
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    cardColor: const Color(0xFFF5F7FA),
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFF667EEA),
+      secondary: Color(0xFF764BA2),
+      surface: Color(0xFFF5F7FA),
+      background: Color(0xFFE8ECF1),
+    ),
+  );
+
+  static final ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    primarySwatch: Colors.blue,
+    scaffoldBackgroundColor: const Color(0xFF1A202C),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF1A202C),
+      elevation: 0,
+      iconTheme: IconThemeData(color: Color(0xFFE2E8F0)),
+      titleTextStyle: TextStyle(
+        color: Color(0xFFE2E8F0),
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    cardColor: const Color(0xFF2D3748),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFF667EEA),
+      secondary: Color(0xFF764BA2),
+      surface: Color(0xFF2D3748),
+      background: Color(0xFF1A202C),
+    ),
+  );
 }
