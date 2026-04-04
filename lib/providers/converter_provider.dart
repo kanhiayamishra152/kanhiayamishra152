@@ -1,77 +1,132 @@
-// lib/providers/converter_provider.dart
 import 'package:flutter/material.dart';
-import '../models/unit_model.dart';
-import '../utils/conversion_logic.dart';
+import 'package:flutter/services.dart';
+import '../models/unit_models.dart';
+import '../models/unit_data.dart';
 
-class ConverterProvider extends ChangeNotifier {
+class ConverterProvider with ChangeNotifier {
   UnitCategory _selectedCategory = UnitCategory.weight;
-  UnitModel _fromUnit = UnitCategory.weight.units[0];
-  UnitModel _toUnit = UnitCategory.weight.units[1];
+  int _fromUnitIndex = 0;
+  int _toUnitIndex = 1;
   String _inputValue = '';
-  String _result = '';
+  bool _isDarkMode = false;
 
+  // Getters
   UnitCategory get selectedCategory => _selectedCategory;
-  UnitModel get fromUnit => _fromUnit;
-  UnitModel get toUnit => _toUnit;
+  int get fromUnitIndex => _fromUnitIndex;
+  int get toUnitIndex => _toUnitIndex;
   String get inputValue => _inputValue;
-  String get result => _result;
+  bool get isDarkMode => _isDarkMode;
+  
+  CategoryData get currentCategory => UnitConstants.categories[_selectedCategory]!;
+  List<UnitData> get currentUnits => currentCategory.units;
+  
+  UnitData get fromUnit => currentUnits[_fromUnitIndex];
+  UnitData get toUnit => currentUnits[_toUnitIndex];
 
-  void selectCategory(UnitCategory category) {
+  // Setters with notification
+  void setCategory(UnitCategory category) {
     _selectedCategory = category;
-    _fromUnit = category.units[0];
-    _toUnit = category.units[1];
-    _calculateResult();
+    _fromUnitIndex = 0;
+    _toUnitIndex = 1;
+    _inputValue = '';
     notifyListeners();
   }
 
-  void selectFromUnit(UnitModel unit) {
-    _fromUnit = unit;
-    _calculateResult();
+  void setFromUnit(int index) {
+    _fromUnitIndex = index;
     notifyListeners();
   }
 
-  void selectToUnit(UnitModel unit) {
-    _toUnit = unit;
-    _calculateResult();
+  void setToUnit(int index) {
+    _toUnitIndex = index;
     notifyListeners();
   }
 
   void setInputValue(String value) {
     _inputValue = value;
-    _calculateResult();
+    notifyListeners();
+  }
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
     notifyListeners();
   }
 
   void swapUnits() {
-    UnitModel temp = _fromUnit;
-    _fromUnit = _toUnit;
-    _toUnit = temp;
-    _calculateResult();
+    final temp = _fromUnitIndex;
+    _fromUnitIndex = _toUnitIndex;
+    _toUnitIndex = temp;
     notifyListeners();
   }
 
-  void _calculateResult() {
-    if (_inputValue.isEmpty) {
-      _result = '';
-      return;
+  // Conversion logic
+  double convert() {
+    if (_inputValue.isEmpty) return 0.0;
+    
+    double input = double.tryParse(_inputValue) ?? 0.0;
+    
+    // Special handling for temperature
+    if (_selectedCategory == UnitCategory.temperature) {
+      return _convertTemperature(input);
     }
+    
+    // Standard conversion: input -> base unit -> output unit
+    double baseValue = input * fromUnit.conversionFactor;
+    double result = baseValue / toUnit.conversionFactor;
+    
+    return result;
+  }
 
-    double? value = double.tryParse(_inputValue);
-    if (value == null) {
-      _result = '';
-      return;
+  double _convertTemperature(double input) {
+    // Convert from source to Celsius first
+    double celsius;
+    switch (_fromUnitIndex) {
+      case 0: // Celsius
+        celsius = input;
+        break;
+      case 1: // Fahrenheit
+        celsius = (input - 32) * 5 / 9;
+        break;
+      case 2: // Kelvin
+        celsius = input - 273.15;
+        break;
+      default:
+        celsius = input;
     }
+    
+    // Convert from Celsius to target
+    switch (_toUnitIndex) {
+      case 0: // Celsius
+        return celsius;
+      case 1: // Fahrenheit
+        return (celsius * 9 / 5) + 32;
+      case 2: // Kelvin
+        return celsius + 273.15;
+      default:
+        return celsius;
+    }
+  }
 
-    try {
-      double convertedValue = ConversionLogic.convert(
-        value,
-        _selectedCategory,
-        _fromUnit,
-        _toUnit,
-      );
-      _result = ConversionLogic.formatResult(convertedValue);
-    } catch (e) {
-      _result = 'Error';
+  String getFormattedResult() {
+    double result = convert();
+    
+    // Format with high precision (up to 10 decimal places)
+    if (result == 0.0) return '0';
+    
+    // Remove trailing zeros but keep up to 10 decimal places
+    String formatted = result.toStringAsFixed(10);
+    formatted = formatted.replaceAll(RegExp(r'\.?0+$'), '');
+    
+    // Handle very small or very large numbers
+    if (formatted.length > 15 || (result.abs() < 0.000001 && result != 0)) {
+      return result.toPrecision(10);
     }
+    
+    return formatted;
+  }
+
+  Future<void> copyToClipboard() async {
+    String result = getFormattedResult();
+    await Clipboard.setData(ClipboardData(text: '$result ${toUnit.symbol}'));
   }
 }
